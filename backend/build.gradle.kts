@@ -40,7 +40,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("io.github.openfeign.querydsl:querydsl-core:7.1")
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
     kapt("io.github.openfeign.querydsl:querydsl-apt:7.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
