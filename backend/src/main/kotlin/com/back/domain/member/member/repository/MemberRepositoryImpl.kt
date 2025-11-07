@@ -4,10 +4,13 @@ import com.back.domain.member.member.entity.Member
 import com.back.domain.member.member.entity.QMember
 import com.back.domain.member.member.entity.QMember.member
 import com.querydsl.jpa.impl.JPAQueryFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 
 class MemberRepositoryImpl(
     private val jpaQueryFactory: JPAQueryFactory,
-): MemberRepositoryCustom {
+) : MemberRepositoryCustom {
     override fun findQById(id: Long): Member? {
         val Member = QMember.member
 
@@ -56,7 +59,8 @@ class MemberRepositoryImpl(
             .selectFrom(member)
             .where(
                 member.username.eq(username)
-                    .and(member.nickname.eq(nickname)))
+                    .and(member.nickname.eq(nickname))
+            )
             .fetchOne()
     }
 
@@ -73,7 +77,7 @@ class MemberRepositoryImpl(
                 member.username.eq(username)
                     .and(
                         member.password.eq(password)
-                        .or(member.nickname.eq(nickname))
+                            .or(member.nickname.eq(nickname))
                     )
             )
             .fetch()
@@ -113,5 +117,35 @@ class MemberRepositoryImpl(
             .from(member)
             .where(member.nickname.contains(nickname))
             .fetchFirst() == 1;
+    }
+
+    override fun findQByNicknameContaining(
+        nickname: String,
+        pageable: Pageable
+    ): Page<Member> {
+        val Member = QMember.member
+
+        // content 쿼리
+        val result = jpaQueryFactory
+            .select(member)
+            .from(member)
+            .where(member.nickname.like("%${nickname}%"))
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch()
+
+        // totalCount 쿼리
+        val totalCount= jpaQueryFactory
+            .select(member.count())
+            .from(member)
+            .where(member.nickname.like("%${nickname}%"))
+            .fetchOne() ?: 0L
+
+        return PageImpl(
+            result,
+            pageable,
+            totalCount
+        )
+
     }
 }
