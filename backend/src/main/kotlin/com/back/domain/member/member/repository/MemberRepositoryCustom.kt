@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable
 interface MemberRepositoryCustom {
     fun findQById(id :Long) : Member?
     fun findQByUserName(name:String) : Member?
+    fun findQByUsernameContaining(string: String, pageable: Pageable): Page<Member>
     fun findQByIdIn(ids: List<Long>): List<Member>
     fun findQByUsernameAndNickname(username: String, nickname: String): Member?
     fun findQByUsernameOrNickname(username: String, nickname: String): List<Member>

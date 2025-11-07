@@ -134,16 +134,7 @@ class MemberRepositoryImpl(
             .limit(pageable.pageSize.toLong())
             .fetch()
 
-        // totalCount 쿼리
-        val totalCount= jpaQueryFactory
-            .select(member.count())
-            .from(member)
-            .where(member.nickname.like("%${nickname}%"))
-            .fetchOne() ?: 0L
-
-
-
-        return PageableExecutionUtils.getPage(content,pageable,{
+        return PageableExecutionUtils.getPage(content, pageable, {
             jpaQueryFactory
                 .select(member.count())
                 .from(member)
@@ -163,5 +154,41 @@ class MemberRepositoryImpl(
             .where(member.nickname.contains(nickname))
             .orderBy(member.id.desc())
             .fetch()
+    }
+
+    override fun findQByUsernameContaining(
+        string: String,
+        pageable: Pageable
+    ): Page<Member> {
+        val Member = QMember.member
+
+        val query = jpaQueryFactory
+            .select(member)
+            .from(member)
+            .where(member.username.like("%${string}%"))
+
+        pageable.sort.forEach {
+            order -> when(order.property) {
+                "id" -> query.orderBy(if(order.isAscending) member.id.asc() else member.id.desc())
+                "nickname" -> query.orderBy(if(order.isAscending) member.nickname.asc() else member.nickname.desc())
+                "username" -> query.orderBy(if(order.isAscending) member.username.asc() else member.username.desc())
+            }
+        }
+
+        val content = query
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch()
+
+        return PageableExecutionUtils.getPage(
+            content, pageable,
+            {
+                jpaQueryFactory
+                    .select(member.count())
+                    .from(member)
+                    .where(member.username.like("${String}"))
+                    .fetchOne() ?: 0L
+            })
+
     }
 }
