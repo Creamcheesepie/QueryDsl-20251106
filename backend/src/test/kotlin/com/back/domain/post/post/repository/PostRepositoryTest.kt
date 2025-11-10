@@ -107,4 +107,23 @@ class PostRepositoryTest {
         assertThat(second.content).hasSize(1)
         assertThat(second.content.first().title).isEqualTo("제목1")
     }
+
+
+    @Test
+    @DisplayName("findQPagedByKw")
+    fun t5() {
+        val postPage = postRepository.findQPagedByKw(
+            PostSearchKeywordType.AUTHOR_NICKNAME,
+            "유저",
+            PageRequest.of(
+                0,
+                10,
+                PostSearchSortType.ID.sortBy
+            ),
+        )
+
+        val content = postPage.content
+
+        assertThat(content).isNotEmpty
+    }
 }

@@ -3,6 +3,6 @@ package com.back.standard.enum
 enum class PostSearchKeywordType {
     TITLE,
     CONTENT,
-    AUTHOR,
+    AUTHOR_NICKNAME,
     ALL;
 }
