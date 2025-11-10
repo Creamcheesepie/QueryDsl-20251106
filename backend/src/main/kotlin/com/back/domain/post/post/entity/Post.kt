@@ -15,7 +15,6 @@ import jakarta.persistence.OneToMany
 @Entity
 class Post(
     @field:ManyToOne(fetch = FetchType.LAZY)
-
     var author: Member,
 
     var title: String,
