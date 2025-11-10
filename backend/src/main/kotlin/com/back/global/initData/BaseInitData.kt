@@ -36,6 +36,9 @@ class BaseInitData(
             Triple("user1", "1234", "유저1"),
             Triple("user2", "1234", "유저2"),
             Triple("user3", "1234", "유저3"),
+            Triple("user4", "1234", "유저4"),
+            Triple("user5", "1234", "유저5"),
+            Triple("user6", "1234", "유저6"),
         ).forEach { (username, password, nickname) ->
             memberService.join(username, password, nickname).apply {
                 updateApiKey(username)

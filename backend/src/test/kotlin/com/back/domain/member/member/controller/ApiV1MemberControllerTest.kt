@@ -49,12 +49,12 @@ class ApiV1MemberControllerTest {
                     .content(
                         """
                                         {
-                                            "username": "%s",
-                                            "password": "%s",
-                                            "nickname": "%s"
+                                            "username": "${username}",
+                                            "password": "${password}",
+                                            "nickname": "${nickname}"
                                         }
                                         
-                                        """.trimIndent().formatted(username, password, nickname)
+                                        """.trimIndent()
                     )
             )
             .andDo(MockMvcResultHandlers.print())
@@ -64,7 +64,7 @@ class ApiV1MemberControllerTest {
             .andExpect(MockMvcResultMatchers.handler().methodName("join"))
             .andExpect(MockMvcResultMatchers.status().isCreated())
             .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("201-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("회원가입이 완료되었습니다. %s님 환영합니다.".formatted(nickname)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("회원가입이 완료되었습니다. ${nickname}님 환영합니다."))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.memberDto.id").value(6))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.memberDto.createDate").exists())
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.memberDto.modifyDate").exists())
@@ -89,13 +89,13 @@ class ApiV1MemberControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
-                                        {
-                                            "username": "%s",
-                                            "password": "%s",
-                                            "nickname": "%s"
+                                        {           
+                                            "username": "${username}",
+                                            "password": "${password}",
+                                            "nickname": "${nickname}"
                                         }
                                         
-                                        """.trimIndent().formatted(username, password, nickname)
+                                        """.trimIndent()
                     )
             )
             .andDo(MockMvcResultHandlers.print())
@@ -122,11 +122,11 @@ class ApiV1MemberControllerTest {
                     .content(
                         """
                                         {
-                                            "username": "%s",
-                                            "password": "%s"
+                                            "username": "${username}",
+                                            "password": "${password}"
                                         }
                                         
-                                        """.trimIndent().formatted(username, password)
+                                        """.trimIndent()
                     )
             )
             .andDo(MockMvcResultHandlers.print())
@@ -138,7 +138,7 @@ class ApiV1MemberControllerTest {
             .andExpect(MockMvcResultMatchers.handler().methodName("login"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("200-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("%s님 환영합니다.".formatted(username)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("${username}님 환영합니다."))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.apiKey").exists())
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.accessToken").isNotEmpty())
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.memberDto.id").value(member.id))

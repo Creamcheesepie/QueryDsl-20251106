@@ -3,6 +3,11 @@ package com.back.domain.member.member.repository
 import com.back.domain.member.member.entity.Member
 import com.back.domain.member.member.entity.QMember
 import com.back.domain.member.member.entity.QMember.member
+import com.back.standard.enum.MemberSearchKeywordType
+import com.back.standard.enum.MemberSearchSortType
+import com.querydsl.core.BooleanBuilder
+import com.querydsl.core.types.Order
+import com.querydsl.core.types.OrderSpecifier
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -167,11 +172,11 @@ class MemberRepositoryImpl(
             .from(member)
             .where(member.username.like("%${string}%"))
 
-        pageable.sort.forEach {
-            order -> when(order.property) {
-                "id" -> query.orderBy(if(order.isAscending) member.id.asc() else member.id.desc())
-                "nickname" -> query.orderBy(if(order.isAscending) member.nickname.asc() else member.nickname.desc())
-                "username" -> query.orderBy(if(order.isAscending) member.username.asc() else member.username.desc())
+        pageable.sort.forEach { order ->
+            when (order.property) {
+                "id" -> query.orderBy(if (order.isAscending) member.id.asc() else member.id.desc())
+                "nickname" -> query.orderBy(if (order.isAscending) member.nickname.asc() else member.nickname.desc())
+                "username" -> query.orderBy(if (order.isAscending) member.username.asc() else member.username.desc())
             }
         }
 
@@ -190,5 +195,66 @@ class MemberRepositoryImpl(
                     .fetchOne() ?: 0L
             })
 
+    }
+
+    override fun findByKwPaged(
+        kw: String,
+        kwType: MemberSearchKeywordType,
+        pageable: Pageable
+    ): Page<Member> {
+        val Member = QMember.member
+
+        val builder = BooleanBuilder()?.apply {
+            when (kwType) {
+                MemberSearchKeywordType.USERNAME -> this.and(member.username.like("%${kw}%"))
+                MemberSearchKeywordType.NICKNAME -> this.and(member.nickname.like("%${kw}%"))
+                MemberSearchKeywordType.ALL -> this.and(
+                    member.username.like("%${kw}%").or(member.nickname.like("%${kw}%"))
+                )
+            }
+        }
+
+
+
+        // content 쿼리
+        val query = jpaQueryFactory
+            .select(member)
+            .from(member)
+            .where(builder)
+
+        pageable.sort.forEach { order ->
+             val path = when (order.property) {
+                MemberSearchSortType.ID.property -> member.id
+                MemberSearchSortType.NICKNAME.property -> member.nickname
+                MemberSearchSortType.USERNAME.property -> member.username
+                else -> null
+            }
+
+            path?.let { property ->
+                OrderSpecifier(
+                    if(order.isAscending) Order.ASC else Order.DESC,
+                    property,
+                )?. let{
+                    query.orderBy(it)
+                }
+            }
+        }
+
+        val content = query
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch()
+
+
+
+        return PageableExecutionUtils.getPage(
+            content, pageable,
+            {
+                jpaQueryFactory
+                    .select(member.count())
+                    .from(member)
+                    .where(builder)
+                    .fetchOne() ?: 0L
+            })
     }
 }
